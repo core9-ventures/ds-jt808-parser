@@ -158,108 +158,155 @@ export class LocationParser {
         // start from byte 41 to n - 3
 
         while (reader.remaining >= 2) {
-            const header = reader.readByte();
-            const extraLength = reader.readByte();
+            const id = reader.readByte();
+            const length = reader.readByte();
 
-            //const extraReader = new BufferReader(reader.readBytes(extraLength));
-            const extraReader = new BufferReader(reader.readBytes(extraLength));
+            // Malformed or truncated packet: stop instead of throwing
+            if (length > reader.remaining) {
+                console.warn(`Extra item 0x${id.toString(16)} claims ${length} bytes, only ${reader.remaining} left`);
+                break;
+            }
 
-            switch (header) {
+            // This advances `reader` past the item. Nothing else should touch `reader` for this item.
+            const extra = new BufferReader(reader.readBytes(length));
+
+            switch (id) {
                 case 0x01:
-                    // milleage: 4 bytes *single
-                    // byte 0-3: total mileage
-                    // TODO what is 1/10 km
-                    this.totalMileage = extraReader.readDWord() / 10;
+                    // Mileage: DWORD, unit 1/10 km -> divide by 10 for km
+                    if (length >= 4) this.totalMileage = extra.readDWord() / 10;
                     break;
 
                 case 0x30:
-                    // mobile signal strength: 1 byte
-                    // byte 0: signal strength
-                    this.mobileSignalStrength = extraReader.readByte();
+                    // Mobile signal strength: BYTE
+                    if (length >= 1) this.mobileSignalStrength = extra.readByte();
                     break;
-                case 0xF0:
-                    // Base station information: 13 bytes per station
-                    this.baseStationDataArr = [];
 
-                    while (extraReader.remaining >= 13) {
-                        const stationData: BaseStationData = {
-                            MCC: extraReader.readWord(),
-                            MNC: extraReader.readWord(),
-                            CI: extraReader.readDWord(),
-                            LAC: extraReader.readDWord(),
-                            RSSI: extraReader.readByte()
-                        };
-                        this.baseStationDataArr.push(stationData);
+                case 0xF0:
+                    this.baseStationDataArr = [];
+                    while (extra.remaining >= 13) {
+                        this.baseStationDataArr.push({
+                            MCC: extra.readWord(),
+                            MNC: extra.readWord(),
+                            CI: extra.readDWord(),
+                            LAC: extra.readDWord(),
+                            RSSI: extra.readByte(),
+                        });
                     }
                     break;
+
                 case 0xF1:
-                    // Power supply: 4 bytes, millivolts
-                    this.powerSupplyMv = extraReader.readDWord();
-                break;
-
-                // case 0x64: {
-                //     this.adasAlarms = {
-                //         alarmId: extraReader.readDWord(),
-                //         //alarmStatus: extraReader.readByte(),
-                //         alarmStatus: ADAS_STATES[extraReader.readByte()] ?? extraReader.readByte(),
-                //         //alarmType: extraReader.readByte(),
-                //         alarmType: ADAS_TYPES[extraReader.readByte()] ?? `user-defined (${extraReader.readByte()})`,
-                //         alarmLevel: extraReader.readByte(),
-                //         frontVehicleSpeed: extraReader.readByte(),
-                //         frontVehicleDistance: extraReader.readByte(),
-                //         laneDeparture: extraReader.readByte(),
-                //         roadSignType: extraReader.readByte(),
-                //         roadSignValue: extraReader.readByte(),
-                //         vehicleSpeed: extraReader.readByte(),
-                //         altitude: extraReader.readWord(),
-                //         latitude: extraReader.readDWord() / 10e5,
-                //         longitude: extraReader.readDWord() / 10e5,
-                //         timestamp: decodeBcdDateTime(extraReader.readBytes(6)),
-                //         vehicleStatus: extraReader.readWord(),
-                //         alarmLabel: Buffer.from(extraReader.readBytes(16))
-                //     };
-
-                // break;
-                // }
-
-                // case 0x65: {
-
-                //     const alarmId = extraReader.readDWord();
-                //     const alarmStatus = DSM_STATES[extraReader.readByte()] ?? extraReader.readByte();
-                //     const alarmType = DSM_TYPES[extraReader.readByte()] ?? `user-defined (${extraReader.readByte()})`;
-                //     const alarmLevel = extraReader.readByte();
-                //     const fatigueLevel = extraReader.readByte();
-
-                //     // Reserved bytes
-                //     extraReader.skip(4);
-
-                //     this.dsmAlarms = {
-                //         alarmId,
-                //         alarmStatus,
-                //         alarmType,
-                //         alarmLevel,
-                //         fatigueLevel,
-                //         vehicleSpeed: extraReader.readByte(),
-                //         altitude: extraReader.readWord(),
-                //         latitude: extraReader.readDWord() / 10e5,
-                //         longitude: extraReader.readDWord() / 10e5,
-                //         timestamp: decodeBcdDateTime(extraReader.readBytes(6)),
-                //         vehicleStatus: extraReader.readWord(),
-                //         alarmLabel: Buffer.from(extraReader.readBytes(16))
-                //     };
-
-                // break;
-                // }
-
-
+                    if (length >= 4) this.powerSupplyMv = extra.readDWord();
+                    break;
 
                 default:
-                    reader.skip(extraLength);
+                    // Unknown item: nothing to do. Its bytes were already consumed by readBytes(length).
                     break;
             }
         }
 
-       
+        // while (reader.remaining >= 2) {
+        //     const header = reader.readByte();
+        //     const extraLength = reader.readByte();
+
+        //     //const extraReader = new BufferReader(reader.readBytes(extraLength));
+        //     const extraReader = new BufferReader(reader.readBytes(extraLength));
+
+        //     switch (header) {
+        //         case 0x01:
+        //             // milleage: 4 bytes *single
+        //             // byte 0-3: total mileage
+        //             // TODO what is 1/10 km
+        //             this.totalMileage = extraReader.readDWord() / 10;
+        //             break;
+
+        //         case 0x30:
+        //             // mobile signal strength: 1 byte
+        //             // byte 0: signal strength
+        //             this.mobileSignalStrength = extraReader.readByte();
+        //             break;
+        //         case 0xF0:
+        //             // Base station information: 13 bytes per station
+        //             this.baseStationDataArr = [];
+
+        //             while (extraReader.remaining >= 13) {
+        //                 const stationData: BaseStationData = {
+        //                     MCC: extraReader.readWord(),
+        //                     MNC: extraReader.readWord(),
+        //                     CI: extraReader.readDWord(),
+        //                     LAC: extraReader.readDWord(),
+        //                     RSSI: extraReader.readByte()
+        //                 };
+        //                 this.baseStationDataArr.push(stationData);
+        //             }
+        //             break;
+        //         case 0xF1:
+        //             // Power supply: 4 bytes, millivolts
+        //             this.powerSupplyMv = extraReader.readDWord();
+        //         break;
+
+        //         // case 0x64: {
+        //         //     this.adasAlarms = {
+        //         //         alarmId: extraReader.readDWord(),
+        //         //         //alarmStatus: extraReader.readByte(),
+        //         //         alarmStatus: ADAS_STATES[extraReader.readByte()] ?? extraReader.readByte(),
+        //         //         //alarmType: extraReader.readByte(),
+        //         //         alarmType: ADAS_TYPES[extraReader.readByte()] ?? `user-defined (${extraReader.readByte()})`,
+        //         //         alarmLevel: extraReader.readByte(),
+        //         //         frontVehicleSpeed: extraReader.readByte(),
+        //         //         frontVehicleDistance: extraReader.readByte(),
+        //         //         laneDeparture: extraReader.readByte(),
+        //         //         roadSignType: extraReader.readByte(),
+        //         //         roadSignValue: extraReader.readByte(),
+        //         //         vehicleSpeed: extraReader.readByte(),
+        //         //         altitude: extraReader.readWord(),
+        //         //         latitude: extraReader.readDWord() / 10e5,
+        //         //         longitude: extraReader.readDWord() / 10e5,
+        //         //         timestamp: decodeBcdDateTime(extraReader.readBytes(6)),
+        //         //         vehicleStatus: extraReader.readWord(),
+        //         //         alarmLabel: Buffer.from(extraReader.readBytes(16))
+        //         //     };
+
+        //         // break;
+        //         // }
+
+        //         // case 0x65: {
+
+        //         //     const alarmId = extraReader.readDWord();
+        //         //     const alarmStatus = DSM_STATES[extraReader.readByte()] ?? extraReader.readByte();
+        //         //     const alarmType = DSM_TYPES[extraReader.readByte()] ?? `user-defined (${extraReader.readByte()})`;
+        //         //     const alarmLevel = extraReader.readByte();
+        //         //     const fatigueLevel = extraReader.readByte();
+
+        //         //     // Reserved bytes
+        //         //     extraReader.skip(4);
+
+        //         //     this.dsmAlarms = {
+        //         //         alarmId,
+        //         //         alarmStatus,
+        //         //         alarmType,
+        //         //         alarmLevel,
+        //         //         fatigueLevel,
+        //         //         vehicleSpeed: extraReader.readByte(),
+        //         //         altitude: extraReader.readWord(),
+        //         //         latitude: extraReader.readDWord() / 10e5,
+        //         //         longitude: extraReader.readDWord() / 10e5,
+        //         //         timestamp: decodeBcdDateTime(extraReader.readBytes(6)),
+        //         //         vehicleStatus: extraReader.readWord(),
+        //         //         alarmLabel: Buffer.from(extraReader.readBytes(16))
+        //         //     };
+
+        //         // break;
+        //         // }
+
+
+
+        //         default:
+        //             reader.skip(extraLength);
+        //             break;
+        //     }
+        // }
+
+
 
         return {
             ...header,

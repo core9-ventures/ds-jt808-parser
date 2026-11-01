@@ -58,12 +58,12 @@ export class BufferReader {
     }
 
     get remaining(): number {
-        console.log("BufferReader remaining:", this.buffer.length - this.offset);
+        //console.log("BufferReader remaining:", this.buffer.length - this.offset);
         return this.buffer.length - this.offset;
     }
 
     get position(): number {
-        console.log("BufferReader position:", this.offset);
+        //console.log("BufferReader position:", this.offset);
         return this.offset;
     }
 
