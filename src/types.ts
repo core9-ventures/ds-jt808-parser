@@ -64,3 +64,15 @@ export interface ITerminalRepository {
         proposedAuthenticationCode: string
     ): Promise<RegistrationOutcome>;
 }
+
+
+export interface TerminalLocation {
+    alarmFlags: number;
+    statusFlags: number;
+    latitude: number;
+    longitude: number;
+    altitude: number;
+    speed: number;
+    direction: number;
+    recordedAt: Date;
+}

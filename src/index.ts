@@ -14,6 +14,7 @@ import { RegistrationService } from "./services/registration-service";
 import { InMemoryTerminalRepository } from "./repositories/in-memory-terminal.repository";
 import { AuthenticationParser } from "./protocol/parsers/authentication-parser";
 import { AuthenticationService } from "./services/authentication.service";
+import { LocationParser } from "./protocol/parsers/location-parser";
 
 
 const PORT = 7618;
@@ -30,19 +31,20 @@ const server = net.createServer((socket) => {
     const headerParser = new JT808HeaderParser();
     const registrationParser = new RegistrationParser();
     const authenticationParser = new AuthenticationParser();
+    const locationParser = new LocationParser();
     
     const serialGenerator = new SerialGenerator();
     
     const registrationRepository = new InMemoryTerminalRepository(); 
 
     const responseEncoder = new JT808ResponseEncoder(serialGenerator);
+    
     const generalResponse = new GeneralResponse(responseEncoder);
     const registrationResponse = new RegistrationResponse(responseEncoder);
-    const authenticationService = new AuthenticationService(registrationRepository);
-
-    // Implement this using your database.
+    
     const registrationService = new RegistrationService(registrationRepository);
-
+    const authenticationService = new AuthenticationService(registrationRepository);
+    
     const messageHandler = new JT808MessageHandler(
         generalResponse,
         registrationParser,
@@ -50,6 +52,7 @@ const server = net.createServer((socket) => {
         registrationResponse,
         authenticationParser,
         authenticationService,
+        locationParser
     );
     
     socket.on("data", async(chunk: Buffer) => {
@@ -79,13 +82,15 @@ const server = net.createServer((socket) => {
 
                     const response = await messageHandler.handle(
                         parsed.header,
-                        parsed.body
+                        parsed.body,
+                        validated.raw
                     );
 
                     if (response) {
                         socket.write(response);
                     }
 
+                
                 } catch (error) {
 
                     console.error(

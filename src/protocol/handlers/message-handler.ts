@@ -5,6 +5,7 @@ import type { RegistrationService } from "../../services/registration-service";
 import type { RegistrationParser } from "../parsers/registration-parser";
 import type { AuthenticationService } from "../../services/authentication.service";
 import type { AuthenticationParser } from "../parsers/authentication-parser";
+import type { LocationParser } from "../parsers/location-parser";
 
 export class JT808MessageHandler {
     constructor(
@@ -15,13 +16,14 @@ export class JT808MessageHandler {
         private readonly registrationResponse: RegistrationResponse,
         private readonly authenticationParser: AuthenticationParser,
         private readonly authenticationService: AuthenticationService,
-        
-        
+        private readonly locationParser: LocationParser,
+        //private readonly terminalRepository: any
     ) {}
 
     async handle(
         header: JT808Header,
-        body: Buffer
+        body: Buffer,
+        raw: Buffer
     ): Promise<Buffer | null> {
 
         switch (header.messageId) {
@@ -41,6 +43,9 @@ export class JT808MessageHandler {
             // Terminal authentication
             case 0x0102:
                 return this.handleAuthentication(header, body);
+            
+            case 0x0200:
+                return this.handleLocation(header, body);
 
             default:
                 console.log(
@@ -103,4 +108,26 @@ export class JT808MessageHandler {
         );
 
     }
+
+    private async handleLocation(
+        header: JT808Header,
+        body: Buffer
+    ): Promise<Buffer | null> {
+        
+        const location = this.locationParser.parse(body);
+
+        // await this.terminalRepository.saveLocation(
+        //     header.terminalPhone,
+        //     location
+        // );
+
+        console.log("Terminal location report:", {
+            terminalPhone: header.terminalPhone,
+            location
+        });
+
+        return this.generalResponse.success(header);
+    }
+
+
 }
