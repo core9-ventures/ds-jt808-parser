@@ -20,8 +20,8 @@ import { AuthenticationHandler } from "./protocol/handlers/authentication-handle
 import { LocationHandler } from "./protocol/handlers/location-handler";
 
 
-const PORT = 7618;
-//const PORT = 20021;
+//const PORT = 7618;
+const PORT = 20021;
 
 const server = net.createServer((socket) => {
 
