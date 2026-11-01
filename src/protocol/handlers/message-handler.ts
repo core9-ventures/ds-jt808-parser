@@ -33,8 +33,8 @@ export class JT808MessageHandler {
                 return this.generalResponse.success(header);
 
             // Terminal location report
-            case 0x0200:
-                return this.generalResponse.success(header);
+            // case 0x0200:
+            //     return this.generalResponse.success(header);
 
             // Terminal registration
             case 0x0100:
