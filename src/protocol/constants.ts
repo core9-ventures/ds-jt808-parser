@@ -1,0 +1,19 @@
+export const JT808 = {
+    FRAME_DELIMITER: 0x7E,
+
+    ESCAPE: {
+        FLAG: 0x7D,
+        FLAG_REPLACEMENT: 0x02,
+        ESCAPE_REPLACEMENT: 0x01,
+    },
+
+    MESSAGE_IDS: {
+        PLATFORM_GENERAL_RESPONSE: 0x0001,
+        TERMINAL_HEARTBEAT: 0x0002,
+        TERMINAL_LOGOUT: 0x0003,
+        TERMINAL_REGISTER: 0x0100,
+        TERMINAL_AUTH: 0x0102,
+        LOCATION_REPORT: 0x0200,
+        LOCATION_RESPONSE: 0x0201,
+    },
+} as const;
