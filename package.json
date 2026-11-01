@@ -7,7 +7,7 @@
   "scripts": {
     "start": "npm run build && node dist/index.js",
     "dev": "tsx watch src/index.ts",
-    "build": "tsc"
+    "build": "npx tsc"
   },
   "keywords": [],
   "author": "",
