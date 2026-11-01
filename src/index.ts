@@ -15,6 +15,9 @@ import { InMemoryTerminalRepository } from "./repositories/in-memory-terminal.re
 import { AuthenticationParser } from "./protocol/parsers/authentication-parser";
 import { AuthenticationService } from "./services/authentication.service";
 import { LocationParser } from "./protocol/parsers/location-parser";
+import { RegistrationHandler } from "./protocol/handlers/registration-handler";
+import { AuthenticationHandler } from "./protocol/handlers/authentication-handler";
+import { LocationHandler } from "./protocol/handlers/location-handler";
 
 
 const PORT = 7618;
@@ -27,6 +30,11 @@ const server = net.createServer((socket) => {
 
     //const pool = await sql.connect(dbConfig);
     //const registrationRepository = new SqlRegistrationRepository();
+
+
+
+    
+   
 
     const headerParser = new JT808HeaderParser();
     const registrationParser = new RegistrationParser();
@@ -44,16 +52,34 @@ const server = net.createServer((socket) => {
     
     const registrationService = new RegistrationService(registrationRepository);
     const authenticationService = new AuthenticationService(registrationRepository);
-    
-    const messageHandler = new JT808MessageHandler(
-        generalResponse,
+
+    const registrationHandler = new RegistrationHandler(
         registrationParser,
         registrationService,
-        registrationResponse,
+        registrationResponse
+    );
+
+     const authenticationHandler = new AuthenticationHandler(
         authenticationParser,
         authenticationService,
-        locationParser
+        generalResponse
     );
+
+    const locationHandler = new LocationHandler(
+        locationParser,
+        registrationService,
+        generalResponse
+    );
+
+    const messageHandler = new JT808MessageHandler(
+        generalResponse,
+        registrationHandler,
+        locationHandler,
+        authenticationHandler,
+    );
+
+
+
     
     socket.on("data", async(chunk: Buffer) => {
 

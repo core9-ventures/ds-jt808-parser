@@ -6,18 +6,22 @@ import type { RegistrationParser } from "../parsers/registration-parser";
 import type { AuthenticationService } from "../../services/authentication.service";
 import type { AuthenticationParser } from "../parsers/authentication-parser";
 import type { LocationParser } from "../parsers/location-parser";
+import type { RegistrationHandler } from "./registration-handler";
+import type { AuthenticationHandler } from "./authentication-handler";
+import type { LocationHandler } from "./location-handler";
 
 export class JT808MessageHandler {
     constructor(
         //private readonly encoder: JT808ResponseEncoder,
         private readonly generalResponse: GeneralResponse,
-        private readonly registrationParser: RegistrationParser,
-        private readonly registrationService: RegistrationService,
-        private readonly registrationResponse: RegistrationResponse,
-        private readonly authenticationParser: AuthenticationParser,
-        private readonly authenticationService: AuthenticationService,
-        private readonly locationParser: LocationParser,
-        //private readonly terminalRepository: any
+        private readonly registrationHandler: RegistrationHandler,
+        //private readonly registrationService: RegistrationService,
+        //private readonly registrationResponse: RegistrationResponse,
+        //private readonly authenticationParser: AuthenticationParser,
+        //private readonly authenticationService: AuthenticationService,
+        //private readonly locationParser: LocationParser,
+        private readonly locationHandler: LocationHandler,
+        private readonly authenticationHandler: AuthenticationHandler,
     ) {}
 
     async handle(
@@ -31,10 +35,6 @@ export class JT808MessageHandler {
             // Terminal heartbeat
             case 0x0002:
                 return this.generalResponse.success(header);
-
-            // Terminal location report
-            // case 0x0200:
-            //     return this.generalResponse.success(header);
 
             // Terminal registration
             case 0x0100:
@@ -63,21 +63,10 @@ export class JT808MessageHandler {
         body: Buffer
     ): Promise<Buffer | null> {
 
-        const registration = this.registrationParser.parse(
+    
+        return this.registrationHandler.handle(
             header,
             body
-        );
-
-        console.log("Terminal registration:", registration);
-
-        const outcome = await this.registrationService.register(
-            registration
-        );
-
-        return this.registrationResponse.create(
-            header,
-            outcome.result,
-            outcome.authenticationCode
         );
 
     }
@@ -87,25 +76,9 @@ export class JT808MessageHandler {
         body: Buffer
     ): Promise<Buffer | null> {
 
-        // We'll implement authentication validation
-        // in the next step.
-        const authentication = this.authenticationParser.parse(body);
-
-        const isAuthenticated =
-            await this.authenticationService.authenticate(
-                header.terminalPhone,
-                authentication.authenticationCode
-            );
-
-        console.log("Terminal authentication:", {
-            terminalPhone: header.terminalPhone,
-            authenticated: isAuthenticated
-        });
-
-        return this.generalResponse.create(
+        return this.authenticationHandler.handle(
             header,
-            0
-            //isAuthenticated ? GeneralResponseResult.Success: GeneralResponseResult.Failure
+            body
         );
 
     }
@@ -115,19 +88,10 @@ export class JT808MessageHandler {
         body: Buffer
     ): Promise<Buffer | null> {
         
-        const location = this.locationParser.parse(body);
-
-        // await this.terminalRepository.saveLocation(
-        //     header.terminalPhone,
-        //     location
-        // );
-
-        console.log("Terminal location report:", {
-            terminalPhone: header.terminalPhone,
-            location
-        });
-
-        return this.generalResponse.success(header);
+        return this.locationHandler.handle(
+            header,
+            body
+        );
     }
 
 
