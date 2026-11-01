@@ -157,48 +157,45 @@ export class LocationParser {
         // extended data
         // start from byte 41 to n - 3
 
-
-
         while (reader.remaining >= 2) {
             const header = reader.readByte();
             const extraLength = reader.readByte();
 
-            const extraReader = new BufferReader(
-                reader.readBytes(extraLength)
-            );
+            //const extraReader = new BufferReader(reader.readBytes(extraLength));
+            const extraReader = new BufferReader(reader.readBytes(extraLength));
 
             switch (header) {
                 case 0x01:
                     // milleage: 4 bytes *single
                     // byte 0-3: total mileage
                     // TODO what is 1/10 km
-                    this.totalMileage = reader.readDWord() / 10;
+                    this.totalMileage = extraReader.readDWord() / 10;
                     break;
 
                 case 0x30:
                     // mobile signal strength: 1 byte
                     // byte 0: signal strength
-                    this.mobileSignalStrength = reader.readByte();
+                    this.mobileSignalStrength = extraReader.readByte();
                     break;
-                // case 0xF0:
-                //     // Base station information: 13 bytes per station
-                //     this.baseStationDataArr = [];
+                case 0xF0:
+                    // Base station information: 13 bytes per station
+                    this.baseStationDataArr = [];
 
-                //     while (extraReader.remaining >= 13) {
-                //         const stationData: BaseStationData = {
-                //             MCC: extraReader.readWord(),
-                //             MNC: extraReader.readWord(),
-                //             CI: extraReader.readDWord(),
-                //             LAC: extraReader.readDWord(),
-                //             RSSI: extraReader.readByte()
-                //         };
-                //         this.baseStationDataArr.push(stationData);
-                //     }
-                //     break;
-                // case 0xF1:
-                //     // Power supply: 4 bytes, millivolts
-                //     this.powerSupplyMv = extraReader.readDWord();
-                // break;
+                    while (extraReader.remaining >= 13) {
+                        const stationData: BaseStationData = {
+                            MCC: extraReader.readWord(),
+                            MNC: extraReader.readWord(),
+                            CI: extraReader.readDWord(),
+                            LAC: extraReader.readDWord(),
+                            RSSI: extraReader.readByte()
+                        };
+                        this.baseStationDataArr.push(stationData);
+                    }
+                    break;
+                case 0xF1:
+                    // Power supply: 4 bytes, millivolts
+                    this.powerSupplyMv = extraReader.readDWord();
+                break;
 
                 // case 0x64: {
                 //     this.adasAlarms = {
