@@ -252,8 +252,8 @@ export class LocationParser {
                     const roadSignValue = extra.readByte();
                     const vehicleSpeed = extra.readByte();           // km/h
 
-                    const position = readAlarmPosition(extra);
-                    const alarmLabel = readAlarmLabel(extra);
+                    const position = this.readAlarmPosition(extra);
+                    const alarmLabel = this.readAlarmLabel(extra);
 
                     this.adasAlarms = {
                         alarmId,
@@ -288,8 +288,8 @@ export class LocationParser {
 
                     const vehicleSpeed = extra.readByte();           // km/h
 
-                    const position = readAlarmPosition(extra);
-                    const alarmLabel = readAlarmLabel(extra);
+                    const position =   this.readAlarmPosition(extra);
+                    const alarmLabel = this.readAlarmLabel(extra);
 
                     this.dsmAlarms = {
                         alarmId,
@@ -305,7 +305,7 @@ export class LocationParser {
                 }
 
                 default:
-                    console.warn(`Unknown extra item 0x${id.toString(16)} with length ${length}`);
+                    //console.warn(`Unknown extra item 0x${id.toString(16)} with length ${length}`);
                     break;
             }
         }
