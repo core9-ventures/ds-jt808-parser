@@ -104,7 +104,8 @@ export class JT808MessageHandler {
 
         return this.generalResponse.create(
             header,
-            isAuthenticated ? GeneralResponseResult.Success: GeneralResponseResult.Failure
+            0
+            //isAuthenticated ? GeneralResponseResult.Success: GeneralResponseResult.Failure
         );
 
     }
