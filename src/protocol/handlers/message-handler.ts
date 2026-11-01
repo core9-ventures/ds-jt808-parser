@@ -45,6 +45,7 @@ export class JT808MessageHandler {
                 return this.handleAuthentication(header, body);
             
             case 0x0200:
+                console.log("Location report received raw:", raw.toString("hex"));
                 return this.handleLocation(header, body);
 
             default:

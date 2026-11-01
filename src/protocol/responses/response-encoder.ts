@@ -47,7 +47,7 @@ export class JT808ResponseEncoder {
             offset += 1;
         }
 
-        encodeBCD(requestHeader.terminalPhone, phoneLength).copy(header, offset);
+        encodeBCD(requestHeader.deviceNumber, phoneLength).copy(header, offset);
 
         offset += phoneLength;
 

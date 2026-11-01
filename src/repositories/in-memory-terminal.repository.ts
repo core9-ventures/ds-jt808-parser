@@ -3,7 +3,7 @@
 import { RegistrationResult, type ITerminalRepository, type RegistrationOutcome, type TerminalRegistration } from "../types";
 
 interface TerminalRecord {
-    terminalPhone: string;
+    deviceNumber: string;
     registration: TerminalRegistration;
     authenticationCode: string;
     isAuthenticated: boolean;
@@ -14,12 +14,12 @@ export class InMemoryTerminalRepository implements ITerminalRepository {
     private readonly terminals = new Map<string, TerminalRecord>();
 
     async register(
-        terminalPhone: string,
+        deviceNumber: string,
         registration: TerminalRegistration,
         proposedAuthenticationCode: string
     ): Promise<RegistrationOutcome> {
 
-        const existing = this.terminals.get(terminalPhone);
+        const existing = this.terminals.get(deviceNumber);
 
         if (existing) {
             return {
@@ -28,8 +28,8 @@ export class InMemoryTerminalRepository implements ITerminalRepository {
             };
         }
 
-        this.terminals.set(terminalPhone, {
-            terminalPhone,
+        this.terminals.set(deviceNumber, {
+            deviceNumber,
             registration,
             authenticationCode: proposedAuthenticationCode,
             isAuthenticated: false
@@ -42,10 +42,10 @@ export class InMemoryTerminalRepository implements ITerminalRepository {
     }
 
     async findAuthenticationCode(
-        terminalPhone: string
+        deviceNumber: string
     ): Promise<string | null> {
 
-        const terminal = this.terminals.get(terminalPhone);
+        const terminal = this.terminals.get(deviceNumber);
 
         if(terminal) {
             return terminal.authenticationCode;

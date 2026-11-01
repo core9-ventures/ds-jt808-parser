@@ -10,13 +10,13 @@ export class AuthenticationService {
     ) {}
 
     async authenticate(
-        terminalPhone: string,
+        deviceNumber: string,
         receivedCode: string
     ): Promise<boolean> {
 
         const storedCode =
             await this.repository.findAuthenticationCode(
-                terminalPhone
+                deviceNumber
             );
 
         // Terminal is not registered.

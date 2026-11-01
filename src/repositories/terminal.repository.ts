@@ -9,7 +9,7 @@ export class TerminalRepository implements ITerminalRepository {
 
     async register(
 
-        terminalPhone: string,
+        deviceNumber: string,
         registration: TerminalRegistration,
         proposedAuthenticationCode: string
 
@@ -17,7 +17,7 @@ export class TerminalRepository implements ITerminalRepository {
 
         // const request = this.pool.request();
 
-        // request.input("TerminalPhone", sql.VarChar(20), terminalPhone);
+        // request.input("deviceNumber", sql.VarChar(20), deviceNumber);
         // request.input("TerminalId", sql.VarChar(50), registration.terminalId);
         // request.input("VehicleNumber", sql.VarChar(30), registration.vehicleNumber);
         // request.input("ProvinceId", sql.Int, registration.provinceId);

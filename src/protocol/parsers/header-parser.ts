@@ -36,7 +36,7 @@ export class JT808HeaderParser {
         // 4. Terminal Phone
         const phoneLength = properties.hasVersion ? 10 : 6;
 
-        const terminalPhone = decodeBCD(reader.readBytes(phoneLength));
+        const deviceNumber = decodeBCD(reader.readBytes(phoneLength));
 
         // 5. Message Serial Number
         const messageSerialNumber = reader.readWord();
@@ -82,7 +82,7 @@ export class JT808HeaderParser {
             hasSubPackage: properties.hasSubPackage,
             protocolVersion,
             protocolVersionNumber,
-            terminalPhone,
+            deviceNumber,
             messageSerialNumber,
             subPackageInfo,
             headerLength

@@ -17,12 +17,12 @@ export class LocationHandler {
        const location = this.parser.parse(body, header);
 
         // await this.terminalRepository.saveLocation(
-        //     header.terminalPhone,
+        //     header.deviceNumber,
         //     location
         // );
 
         console.log("Terminal location report:", {
-            terminalPhone: header.terminalPhone,
+            deviceNumber: header.deviceNumber,
             location
         });
 

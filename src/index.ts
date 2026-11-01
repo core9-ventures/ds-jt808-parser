@@ -103,7 +103,7 @@ const server = net.createServer((socket) => {
                         messageId: `0x${parsed.header.messageId
                             .toString(16)
                             .padStart(4, "0")}`,
-                        terminalPhone: parsed.header.terminalPhone,
+                        deviceNumber: parsed.header.deviceNumber,
                         serialNumber: parsed.header.messageSerialNumber
                     });
 

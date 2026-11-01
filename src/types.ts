@@ -20,7 +20,7 @@ export interface JT808Header {
 
     protocolVersionNumber: number | undefined;
 
-    terminalPhone: string;
+    deviceNumber: string;
 
     messageSerialNumber: number;
 
@@ -59,7 +59,7 @@ export interface RegistrationOutcome {
 
 export interface ITerminalRepository {
     register(
-        terminalPhone: string,
+        deviceNumber: string,
         registration: TerminalRegistration,
         proposedAuthenticationCode: string
     ): Promise<RegistrationOutcome>;

@@ -16,12 +16,12 @@ export class AuthenticationHandler {
 
         const isAuthenticated =
             await this.service.authenticate(
-                header.terminalPhone,
+                header.deviceNumber,
                 authentication.authenticationCode
             );
 
         console.log("Terminal authentication:", {
-            terminalPhone: header.terminalPhone,
+            deviceNumber: header.deviceNumber,
             authenticated: isAuthenticated
         });
 
