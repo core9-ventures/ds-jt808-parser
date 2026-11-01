@@ -48,6 +48,9 @@ function decodeBcdDateTime(buffer: Buffer): Date {
     return date;
 }
 
+  const ADAS_MIN_LENGTH = 47;
+  const DSM_MIN_LENGTH = 47;
+
 export class LocationParser {
 
     // Extended section
@@ -64,6 +67,39 @@ export class LocationParser {
 
     get mobileSignal() {
         return this.mobileSignalStrength;
+    }
+
+  
+
+    // Alarm identification number: 16 bytes
+    //   terminal ID   BYTE[7]
+    //   time          BCD[6]
+    //   serial no.    BYTE
+    //   attachments   BYTE
+    //   reserved      BYTE
+    readAlarmLabel(r: BufferReader) {
+        const raw = r.readBytes(16);
+        const label = new BufferReader(raw);
+
+        return {
+            terminalId: label.readBytes(7).toString("ascii").replace(/\0+$/, ""),
+            time: decodeBcdDateTime(label.readBytes(6)),
+            serialNumber: label.readByte(),
+            attachmentCount: label.readByte(),
+            reserved: label.readByte(),
+            raw: Buffer.from(raw), // copy, so it doesn't reference the packet buffer
+        };
+    }
+
+    // Shared tail: altitude, lat, lon, time, vehicle status
+    readAlarmPosition(r: BufferReader) {
+        return {
+            altitude: r.readWord(),
+            latitude: r.readDWord() / 1e6,
+            longitude: r.readDWord() / 1e6,
+            timestamp: decodeBcdDateTime(r.readBytes(6)),
+            vehicleStatus: r.readWord(),
+        };
     }
 
     parse(body: Buffer, header: JT808Header): any {
@@ -198,8 +234,78 @@ export class LocationParser {
                     if (length >= 4) this.powerSupplyMv = extra.readDWord();
                     break;
 
+                case 0x64: {
+                    // ADAS (Advanced Driver Assistance) alarm
+                    if (length < ADAS_MIN_LENGTH) {
+                        console.warn(`ADAS item too short: ${length} bytes`);
+                        break;
+                    }
+
+                    const alarmId = extra.readDWord();
+                    const statusByte = extra.readByte();
+                    const typeByte = extra.readByte();
+                    const alarmLevel = extra.readByte();
+                    const frontVehicleSpeed = extra.readByte();      // km/h
+                    const frontVehicleDistance = extra.readByte();   // 100 ms units
+                    const laneDeparture = extra.readByte();          // 1 = left, 2 = right
+                    const roadSignType = extra.readByte();
+                    const roadSignValue = extra.readByte();
+                    const vehicleSpeed = extra.readByte();           // km/h
+
+                    const position = readAlarmPosition(extra);
+                    const alarmLabel = readAlarmLabel(extra);
+
+                    this.adasAlarms = {
+                        alarmId,
+                        alarmStatus: ADAS_STATES[statusByte] ?? statusByte,
+                        alarmType: ADAS_TYPES[typeByte] ?? `user-defined (${typeByte})`,
+                        alarmLevel,
+                        frontVehicleSpeed,
+                        frontVehicleDistance,
+                        laneDeparture,
+                        roadSignType,
+                        roadSignValue,
+                        vehicleSpeed,
+                        ...position,
+                        alarmLabel,
+                    };
+                    break;
+                }
+                case 0x65: {
+                    // DSM (Driver Status Monitoring) alarm
+                    if (length < DSM_MIN_LENGTH) {
+                        console.warn(`DSM item too short: ${length} bytes`);
+                        break;
+                    }
+
+                    const alarmId = extra.readDWord();
+                    const statusByte = extra.readByte();
+                    const typeByte = extra.readByte();
+                    const alarmLevel = extra.readByte();
+                    const fatigueLevel = extra.readByte();
+
+                    extra.skip(4); // reserved
+
+                    const vehicleSpeed = extra.readByte();           // km/h
+
+                    const position = readAlarmPosition(extra);
+                    const alarmLabel = readAlarmLabel(extra);
+
+                    this.dsmAlarms = {
+                        alarmId,
+                        alarmStatus: DSM_STATES[statusByte] ?? statusByte,
+                        alarmType: DSM_TYPES[typeByte] ?? `user-defined (${typeByte})`,
+                        alarmLevel,
+                        fatigueLevel,
+                        vehicleSpeed,
+                        ...position,
+                        alarmLabel,
+                    };
+                    break;
+                }
+
                 default:
-                    // Unknown item: nothing to do. Its bytes were already consumed by readBytes(length).
+                    console.warn(`Unknown extra item 0x${id.toString(16)} with length ${length}`);
                     break;
             }
         }
