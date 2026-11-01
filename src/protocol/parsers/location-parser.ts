@@ -80,8 +80,8 @@ export class LocationParser {
     readAlarmLabel(r: BufferReader) {
         const raw = r.readBytes(16);
         const label = new BufferReader(raw);
-
-        return {
+        
+        const alarmLabel = {
             terminalId: label.readBytes(7).toString("ascii").replace(/\0+$/, ""),
             time: decodeBcdDateTime(label.readBytes(6)),
             serialNumber: label.readByte(),
@@ -89,6 +89,8 @@ export class LocationParser {
             reserved: label.readByte(),
             raw: Buffer.from(raw), // copy, so it doesn't reference the packet buffer
         };
+        console.log('alarm-label', alarmLabel)
+        return alarmLabel
     }
 
     // Shared tail: altitude, lat, lon, time, vehicle status
