@@ -8,10 +8,18 @@ function decodeFixedText(buffer: Buffer): string {
         .trim();
 }
 
+
 function decodeVehicleNumber(buffer: Buffer): string {
     return new TextDecoder("gbk")
         .decode(buffer)
         .replace(/\0+$/g, "")
+        .trim();
+}
+
+function decodeTerminalModel(buffer: Buffer): string {
+    return new TextDecoder("gbk")
+        .decode(buffer)
+        .replace(/^\0+|\0+$/g, "")
         .trim();
 }
 
@@ -49,7 +57,7 @@ export class RegistrationParser {
             reader.readBytes(manufacturerLength)
         );
 
-        const terminalModel = decodeFixedText(
+        const terminalModel = decodeTerminalModel(
             reader.readBytes(modelLength)
         );
 
