@@ -28,6 +28,9 @@ function decodeBcdDateTime(buffer: Buffer): Date {
 
     //JT808 timestamps are generally interpreted in China Standard Time.
     //Store the instant in UTC.
+
+    console.log(`Decoded JT808 timestamp: ${year}-${month}-${day} ${hour}:${minute}:${second} (UTC)`);
+
     const date = new Date(Date.UTC(
         year,
         month - 1,
