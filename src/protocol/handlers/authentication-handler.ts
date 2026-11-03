@@ -21,11 +21,8 @@ export class AuthenticationHandler {
         //     authentication.authenticationCode
         // );
 
-        console.log("Handling authentication for device:", header, authentication.authenticationCode === "AUTH123456");
-
         const isAuthenticated = authentication.authenticationCode === "AUTH123456"; 
             
-
         console.log("Terminal authentication:", {
             deviceNumber: header.device_number,
             authenticated: isAuthenticated
@@ -33,7 +30,7 @@ export class AuthenticationHandler {
 
         return this.generalResponse.create(
             header,
-            0
+            isAuthenticated ? 0 : 1
             //isAuthenticated ? GeneralResponseResult.Success: GeneralResponseResult.Failure
         );
     }
