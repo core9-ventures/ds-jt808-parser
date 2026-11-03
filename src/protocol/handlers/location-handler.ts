@@ -21,11 +21,8 @@ export class LocationHandler {
         //     location
         // );
 
-        console.log("Terminal location report:", {
-            deviceNumber: header.deviceNumber,
-            location
-        });
-
+        console.log("Terminal location report:", JSON.stringify(location, null, 2));
+        
         return this.response.success(header);
         
     }
