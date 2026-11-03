@@ -16,7 +16,7 @@ export class LocationHandler {
         
        const location = this.parser.parse(body, header);
 
-        if(location.dsmAlarms.attachmentCount > 0){
+        if(location.dsmAlarms && location.dsmAlarms.attachmentCount > 0){
             console.log("DSM Alarms:", location.dsmAlarms);
             
             await this.repo.create(
