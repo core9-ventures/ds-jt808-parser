@@ -50,6 +50,8 @@ const server = net.createServer((socket) => {
     const registrationService = new RegistrationService(sqlRepository);
     const authenticationService = new AuthenticationService(sqlRepository);
 
+    const terminalRepository = new TerminalRepository();
+
     const registrationHandler = new RegistrationHandler(
         registrationParser,
         registrationService,
@@ -64,7 +66,7 @@ const server = net.createServer((socket) => {
 
     const locationHandler = new LocationHandler(
         locationParser,
-        registrationService,
+        terminalRepository,
         generalResponse
     );
 

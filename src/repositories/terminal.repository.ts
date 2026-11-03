@@ -10,16 +10,16 @@ export class TerminalRepository implements ITerminalRepository {
     //     private readonly pool: sql.ConnectionPool
     // ) {}
 
-    async create(devinceNumber: string, user: { name: string; email: string; age: number }): Promise<any> {
-        const { name, email, age } = user;
+
+    async create(devinceNumber: string, alarmType: string, attachmentCount: number ): Promise<any> {
 
         const query = `
-            INSERT INTO users (name, email, age)
+            INSERT INTO users (device_number, alarm_type, attachment_count)
             VALUES ($1, $2, $3)
             RETURNING *
         `;
 
-        const values = [name, email, age];
+        const values = [devinceNumber, alarmType, attachmentCount];
 
         const result = await pool.query(query, values);
 

@@ -68,6 +68,12 @@ export interface ITerminalRepository {
         deviceNumber: string
     ): Promise<string | null>
 
+    create(
+        deviceNumber: string,
+        alarmType: string,
+        attachmentCount: number,
+    ): Promise<any>;
+
 }
 
 
@@ -81,7 +87,10 @@ export interface TerminalLocation {
     direction: number;
     recordedAt: Date;
     adasAlarms: any;
-    dsmAlarms: any;
+    dsmAlarms: DsmAlarm;
+    mileage: number,
+    mobileSignal: number,
+    deviceNumber: string;
     //baseStationDataArr: BaseStationData[];
 }
 
@@ -112,20 +121,20 @@ export interface AdasAlarm {
     alarmLabel: Buffer;
 }
 
-export interface DsmAlarm {
-    alarmId: number;
-    alarmStatus: number;
-    alarmType: number;
-    alarmLevel: number;
-    fatigueLevel: number;
-    vehicleSpeed: number;
-    altitude: number;
-    latitude: number;
-    longitude: number;
-    timestamp: Date;
-    vehicleStatus: number;
-    alarmLabel: Buffer;
-}
+// export interface DsmAlarm {
+//     alarmId: number;
+//     alarmStatus: number;
+//     alarmType: number;
+//     alarmLevel: number;
+//     fatigueLevel: number;
+//     vehicleSpeed: number;
+//     altitude: number;
+//     latitude: number;
+//     longitude: number;
+//     timestamp: Date;
+//     vehicleStatus: number;
+//     alarmLabel: Buffer;
+// }
 
 export const ADAS_STATES = ["unavailable", "start", "end"];
 
@@ -163,3 +172,47 @@ export const DSM_TYPES: Record<number, string> = {
 };
 
 export const DSM_STATES = ["unavailable", "start", "end"];
+
+
+export interface Position {
+  altitude: number;
+  latitude: number;
+  longitude: number;
+  timestamp: string; 
+  vehicleStatus: number;
+}
+
+export interface AlarmLabel {
+  terminalId: string;
+  time: string
+  serialNumber: number;
+  attachmentCount: number;
+  reserved: number;
+  raw: Buffer;
+}
+
+
+export interface DsmAlarm {
+    alarmId: number;
+    alarmStatus: string;
+    alarmType: string;
+    alarmLevel: number;
+
+    fatigueLevel: number;
+    vehicleSpeed: number;
+
+    // Position properties
+    altitude: number;
+    latitude: number;
+    longitude: number;
+    timestamp: Date;
+    vehicleStatus: number;
+
+    // Alarm label properties
+    terminalId: string;
+    time: Date;
+    serialNumber: number;
+    attachmentCount: number;
+    reserved: number;
+    raw: Buffer;
+}

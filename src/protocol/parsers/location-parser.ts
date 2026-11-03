@@ -58,8 +58,8 @@ export class LocationParser {
     private mobileSignalStrength = 0;
     private baseStationDataArr: BaseStationData[] = [];
     private powerSupplyMv = 0;
-    private adasAlarms: any
-    private dsmAlarms: any
+    private adasAlarms: any;
+    private dsmAlarms!: DsmAlarm 
 
     get mileage() {
         return this.totalMileage;
@@ -104,7 +104,7 @@ export class LocationParser {
         };
     }
 
-    parse(body: Buffer, header: JT808Header): any {
+    parse(body: Buffer, header: JT808Header): TerminalLocation {
         if (body.length < 28) {
             throw new Error("Location report body must contain at least 28 bytes");
         }
@@ -269,7 +269,7 @@ export class LocationParser {
                         roadSignValue,
                         vehicleSpeed,
                         ...position,
-                        alarmLabel,
+                        ...alarmLabel,
                     };
                     break;
                 }
@@ -295,13 +295,13 @@ export class LocationParser {
 
                     this.dsmAlarms = {
                         alarmId,
-                        alarmStatus: DSM_STATES[statusByte] ?? statusByte,
-                        alarmType: DSM_TYPES[typeByte] ?? `user-defined (${typeByte})`,
+                        alarmStatus: DSM_STATES[statusByte] ?? `Unknown (${statusByte})`,
+                        alarmType: DSM_TYPES[typeByte] ?? `Unknown (${typeByte})`,
                         alarmLevel,
                         fatigueLevel,
                         vehicleSpeed,
                         ...position,
-                        alarmLabel,
+                        ...alarmLabel,
                     };
                     break;
                 }

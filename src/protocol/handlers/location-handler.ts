@@ -1,5 +1,5 @@
 import type { RegistrationService } from "../../services/registration-service";
-import type { JT808Header } from "../../types";
+import type { ITerminalRepository, JT808Header } from "../../types";
 import type { LocationParser } from "../parsers/location-parser";
 import type { RegistrationParser } from "../parsers/registration-parser";
 import type { GeneralResponse } from "../responses/general-response";
@@ -8,7 +8,7 @@ import type { RegistrationResponse } from "../responses/registration-response";
 export class LocationHandler {
     constructor(
         private readonly parser: LocationParser,
-        private readonly service: RegistrationService,
+        private readonly repo: ITerminalRepository,
         private readonly response: GeneralResponse
     ) {}
 
@@ -16,11 +16,16 @@ export class LocationHandler {
         
        const location = this.parser.parse(body, header);
 
-        // await this.terminalRepository.saveLocation(
-        //     header.deviceNumber,
-        //     location
-        // );
-
+        if(location.dsmAlarms.attachmentCount > 0){
+            console.log("DSM Alarms:", location.dsmAlarms);
+            
+            await this.repo.create(
+                location.deviceNumber,
+                location.dsmAlarms.alarmType,
+                location.dsmAlarms.attachmentCount,
+             );
+        }
+       
         console.log("Terminal location report:", location);
 
         return this.response.success(header);
