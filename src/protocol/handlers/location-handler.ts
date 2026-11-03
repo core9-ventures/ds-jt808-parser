@@ -1,3 +1,4 @@
+import type { TerminalRepository } from "../../repositories/terminal.repository";
 import type { RegistrationService } from "../../services/registration-service";
 import type { ITerminalRepository, JT808Header } from "../../types";
 import type { LocationParser } from "../parsers/location-parser";

@@ -11,19 +11,24 @@ export class TerminalRepository implements ITerminalRepository {
     // ) {}
 
 
-    async create(devinceNumber: string, alarmType: string, attachmentCount: number ): Promise<any> {
+    async create(devinceNumber: string, alarmType: string, attachmentCount: number): Promise<any> {
 
         const query = `
-            INSERT INTO users (device_number, alarm_type, attachment_count)
+            INSERT INTO alarms (device_number, alarm_type, attachment_count)
             VALUES ($1, $2, $3)
             RETURNING *
         `;
 
         const values = [devinceNumber, alarmType, attachmentCount];
+        try {
+            const result = await pool.query(query, values);
 
-        const result = await pool.query(query, values);
+            return result.rows[0];
 
-        return result.rows[0];
+        } catch (error) {
+            console.error("Database query error:", error);
+            throw error;
+        }
     }
 
     async register(
@@ -51,17 +56,17 @@ export class TerminalRepository implements ITerminalRepository {
         // const row = result.recordset[0];
 
         return {
-           result: RegistrationResult.Success,
-           authenticationCode: "AUTH123456"
+            result: RegistrationResult.Success,
+            authenticationCode: "AUTH123456"
         };
 
     }
 
-     async findAuthenticationCode(
+    async findAuthenticationCode(
         deviceNumber: string
     ): Promise<string | null> {
 
-        
+
 
         return null
     }
