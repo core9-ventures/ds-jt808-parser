@@ -2,6 +2,7 @@ import { BufferReader } from "../../core/buffer-reader";
 import type { JT808Header, TerminalRegistration } from "../../types";
 
 function decodeFixedText(buffer: Buffer): string {
+    console.log("Location report terminal id raw:", buffer.toString("hex"));
     return buffer
         .toString("ascii")
         .replace(/\0+$/g, "")
