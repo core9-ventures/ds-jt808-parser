@@ -21,8 +21,8 @@ export class LocationHandler {
         //     location
         // );
 
-        console.log("Terminal location report:", JSON.stringify(location, null, 2));
-        
+        console.log("Terminal location report:", location);
+
         return this.response.success(header);
         
     }

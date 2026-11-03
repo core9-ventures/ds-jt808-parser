@@ -1,11 +1,10 @@
-import pg from 'pg'
-const { Pool, Client } = pg
-
+import 'dotenv/config';
+import { Pool } from 'pg';
 
 export const pool = new Pool({
-  host: 'pg-300bcd09-ds-jt808-parser-f60a.a.aivencloud.com',
-  port: 22410,
-  user: 'avnadmin',
-  password: 'AVNS_T2PdsjQ5AnKjEItrY19',
-  database: 'defaultdb',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
 });
