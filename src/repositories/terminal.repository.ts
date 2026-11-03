@@ -1,6 +1,6 @@
 //import sql from "mssql";
 import { pool } from "../config/database";
-import { RegistrationResult, type RegistrationOutcome, type ITerminalRepository, type TerminalRegistration } from "../types";
+import { RegistrationResult, type RegistrationOutcome, type ITerminalRepository, type TerminalRegistration, type AlarmDto, type DsmAlarm, type AdasAlarm } from "../types";
 import pg from 'pg'
 const { Pool, Client } = pg
 
@@ -11,22 +11,80 @@ export class TerminalRepository implements ITerminalRepository {
     // ) {}
 
 
-    async create(devinceNumber: string, alarmType: string, attachmentCount: number): Promise<any> {
-
+    async create(device_number: string, alarm: DsmAlarm): Promise<any> {
+        const alarmNumber = crypto.randomUUID().replace(/-/g, "");
         const query = `
-            INSERT INTO alarms (device_number, alarm_type, attachment_count)
-            VALUES ($1, $2, $3)
-            RETURNING *
-        `;
+        INSERT INTO alarms_dsm (
+            device_number,
+            alarm_id,
+            alarm_type,
+            alarm_number,
+            latitude,
+            longitude,
+            attachment_count,
+            alarm_speed,
+            alarm_time
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+    `;
 
-        const values = [devinceNumber, alarmType, attachmentCount];
+        const values = [
+            device_number,
+            alarm.alarm_id ?? null,
+            alarm.alarm_type ?? null,
+            alarmNumber,
+            alarm.latitude ?? null,
+            alarm.longitude ?? null,
+            alarm.attachment_count ?? 0,
+            alarm.vehicle_speed ?? null,
+            alarm.alarm_time ?? null
+        ];
+
         try {
             const result = await pool.query(query, values);
-
             return result.rows[0];
-
         } catch (error) {
-            console.error("Database query error:", error);
+            console.error("Database query error dsm:", error);
+            throw error;
+        }
+    }
+
+    async createAdasAlarm(device_number: string, alarm: AdasAlarm): Promise<any> {
+        const alarmNumber = crypto.randomUUID().replace(/-/g, "");
+        const query = `
+        INSERT INTO alarms_adas (
+            device_number,
+            alarm_id,
+            alarm_type,
+            alarm_number,
+            latitude,
+            longitude,
+            attachment_count,
+            alarm_speed,
+            alarm_time
+        )
+        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
+        RETURNING *
+    `;
+
+        const values = [
+            device_number,
+            alarm.alarm_id ?? null,
+            alarm.alarm_type ?? null,
+            alarmNumber,
+            alarm.latitude ?? null,
+            alarm.longitude ?? null,
+            alarm.attachment_count ?? 0,
+            alarm.vehicle_speed ?? null,
+            alarm.alarm_time ?? null
+        ];
+
+        try {
+            const result = await pool.query(query, values);
+            return result.rows[0];
+        } catch (error) {
+            console.error("Database query error adas:", error);
             throw error;
         }
     }

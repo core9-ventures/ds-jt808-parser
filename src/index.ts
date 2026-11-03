@@ -11,7 +11,6 @@ import { JT808MessageHandler } from "./protocol/handlers/message-handler";
 import { RegistrationParser } from "./protocol/parsers/registration-parser";
 import { RegistrationResponse } from "./protocol/responses/registration-response";
 import { RegistrationService } from "./services/registration-service";
-import { InMemoryTerminalRepository } from "./repositories/in-memory-terminal.repository";
 import { AuthenticationParser } from "./protocol/parsers/authentication-parser";
 import { AuthenticationService } from "./services/authentication.service";
 import { LocationParser } from "./protocol/parsers/location-parser";
@@ -101,7 +100,7 @@ const server = net.createServer((socket) => {
                         messageId: `0x${parsed.header.messageId
                             .toString(16)
                             .padStart(4, "0")}`,
-                        deviceNumber: parsed.header.deviceNumber,
+                        deviceNumber: parsed.header.device_number,
                         serialNumber: parsed.header.messageSerialNumber
                     });
 

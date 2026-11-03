@@ -9,7 +9,7 @@ import type { RegistrationResponse } from "../responses/registration-response";
 export class LocationHandler {
     constructor(
         private readonly parser: LocationParser,
-        private readonly repo: ITerminalRepository,
+        private readonly repo: TerminalRepository,
         private readonly response: GeneralResponse
     ) {}
 
@@ -17,23 +17,26 @@ export class LocationHandler {
         
        const location = this.parser.parse(body, header);
 
-        if(location.dsmAlarms && location.dsmAlarms.attachmentCount > 0){
-            console.log("DSM Alarms:", location.dsmAlarms);
+        if (location.dsmAlarms && location.dsmAlarms.attachment_count > 0) {
             
             try {
-
-                await this.repo.create(
-                    location.deviceNumber,
-                    location.dsmAlarms.alarmType,
-                    location.dsmAlarms.attachmentCount,
-                );
+                await this.repo.create(location.device_number, location.dsmAlarms);
 
             } catch (error) {
-
+                console.error("Failed to save DSM alarm:", error);
             }
-            
         }
-       
+
+        if (location.adasAlarms && location.adasAlarms.attachment_count > 0) {
+            
+            try {
+                await this.repo.createAdasAlarm(location.device_number, location.adasAlarms);
+
+            } catch (error) {
+                console.error("Failed to save ADAS alarm:", error);
+            }
+        }
+        
         console.log("Terminal location report:", location);
 
         return this.response.success(header);

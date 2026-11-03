@@ -28,14 +28,23 @@ function decodeBcdDateTime(buffer: Buffer): Date {
 
     // JT808 timestamps are generally interpreted in China Standard Time.
     // Store the instant in UTC.
-    const date = new Date(Date.UTC(
+    // const date = new Date(Date.UTC(
+    //     year,
+    //     month - 1,
+    //     day,
+    //     hour - 8,
+    //     minute,
+    //     second
+    // ));
+
+    const date = new Date(
         year,
         month - 1,
         day,
         hour - 8,
         minute,
         second
-    ));
+    );
 
     if (
         month < 1 || month > 12 ||
@@ -58,7 +67,7 @@ export class LocationParser {
     private mobileSignalStrength = 0;
     private baseStationDataArr: BaseStationData[] = [];
     private powerSupplyMv = 0;
-    private adasAlarms: any;
+    private adasAlarms!: AdasAlarm;
     private dsmAlarms!: DsmAlarm 
 
     get mileage() {
@@ -82,10 +91,10 @@ export class LocationParser {
         const label = new BufferReader(raw);
         
         const alarmLabel = {
-            terminalId: label.readBytes(7).toString("ascii").replace(/\0+$/, ""),
+            terminal_id: label.readBytes(7).toString("ascii").replace(/\0+$/, ""),
             time: decodeBcdDateTime(label.readBytes(6)),
-            serialNumber: label.readByte(),
-            attachmentCount: label.readByte(),
+            serial_number: label.readByte(),
+            attachment_count: label.readByte(),
             reserved: label.readByte(),
             raw: Buffer.from(raw), // copy, so it doesn't reference the packet buffer
         };
@@ -99,8 +108,8 @@ export class LocationParser {
             altitude: r.readWord(),
             latitude: r.readDWord() / 1e6,
             longitude: r.readDWord() / 1e6,
-            timestamp: decodeBcdDateTime(r.readBytes(6)),
-            vehicleStatus: r.readWord(),
+            alarm_time: decodeBcdDateTime(r.readBytes(6)),
+            vehicle_status: r.readWord(),
         };
     }
 
@@ -258,16 +267,16 @@ export class LocationParser {
                     const alarmLabel = this.readAlarmLabel(extra);
 
                     this.adasAlarms = {
-                        alarmId,
-                        alarmStatus: ADAS_STATES[statusByte] ?? statusByte,
-                        alarmType: ADAS_TYPES[typeByte] ?? `user-defined (${typeByte})`,
-                        alarmLevel,
-                        frontVehicleSpeed,
-                        frontVehicleDistance,
-                        laneDeparture,
-                        roadSignType,
-                        roadSignValue,
-                        vehicleSpeed,
+                        alarm_id: alarmId,
+                        alarm_status: ADAS_STATES[statusByte] ?? `user-defined ${statusByte}`,
+                        alarm_type: ADAS_TYPES[typeByte] ?? `user-defined (${typeByte})`,
+                        alarm_level: alarmLevel,
+                        front_vehicle_speed: frontVehicleSpeed,
+                        front_vehicle_distance: frontVehicleDistance,
+                        lane_departure: laneDeparture,
+                        road_sign_type: roadSignType,
+                        road_sign_value: roadSignValue,
+                        vehicle_speed: vehicleSpeed,
                         ...position,
                         ...alarmLabel,
                     };
@@ -286,7 +295,7 @@ export class LocationParser {
                     const alarmLevel = extra.readByte();
                     const fatigueLevel = extra.readByte();
 
-                    extra.skip(4); // reserved
+                    extra.skip(4); 
 
                     const vehicleSpeed = extra.readByte();           // km/h
 
@@ -294,12 +303,12 @@ export class LocationParser {
                     const alarmLabel = this.readAlarmLabel(extra);
 
                     this.dsmAlarms = {
-                        alarmId,
-                        alarmStatus: DSM_STATES[statusByte] ?? `Unknown (${statusByte})`,
-                        alarmType: DSM_TYPES[typeByte] ?? `Unknown (${typeByte})`,
-                        alarmLevel,
-                        fatigueLevel,
-                        vehicleSpeed,
+                        alarm_id: alarmId,
+                        alarm_status: DSM_STATES[statusByte] ?? `user-defined (${statusByte})`,
+                        alarm_type: DSM_TYPES[typeByte] ?? `user-defined (${typeByte})`,
+                        alarm_level: alarmLevel,
+                        fatigue_level: fatigueLevel,
+                        vehicle_speed: vehicleSpeed,
                         ...position,
                         ...alarmLabel,
                     };

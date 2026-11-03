@@ -82,7 +82,7 @@ export class JT808HeaderParser {
             hasSubPackage: properties.hasSubPackage,
             protocolVersion,
             protocolVersionNumber,
-            deviceNumber,
+            device_number: deviceNumber,
             messageSerialNumber,
             subPackageInfo,
             headerLength

@@ -20,7 +20,7 @@ export interface JT808Header {
 
     protocolVersionNumber: number | undefined;
 
-    deviceNumber: string;
+    device_number: string;
 
     messageSerialNumber: number;
 
@@ -68,11 +68,7 @@ export interface ITerminalRepository {
         deviceNumber: string
     ): Promise<string | null>
 
-    create(
-        deviceNumber: string,
-        alarmType: string,
-        attachmentCount: number,
-    ): Promise<any>;
+    create(device_number: string, alarm: DsmAlarm): Promise<AlarmDto>;
 
 }
 
@@ -90,7 +86,7 @@ export interface TerminalLocation {
     dsmAlarms: DsmAlarm;
     mileage: number,
     mobileSignal: number,
-    deviceNumber: string;
+    device_number: string;
     //baseStationDataArr: BaseStationData[];
 }
 
@@ -102,24 +98,24 @@ export interface BaseStationData {
     RSSI: number;
 }
 
-export interface AdasAlarm {
-    alarmId: number;
-    alarmStatus: number;
-    alarmType: number;
-    alarmLevel: number;
-    frontVehicleSpeed: number;
-    frontVehicleDistance: number;
-    laneDeparture: number;
-    roadSignType: number;
-    roadSignValue: number;
-    vehicleSpeed: number;
-    altitude: number;
-    latitude: number;
-    longitude: number;
-    timestamp: Date;
-    vehicleStatus: number;
-    alarmLabel: Buffer;
-}
+// export interface AdasAlarm {
+//     alarmId: number;
+//     alarmStatus: number;
+//     alarmType: number;
+//     alarmLevel: number;
+//     frontVehicleSpeed: number;
+//     frontVehicleDistance: number;
+//     laneDeparture: number;
+//     roadSignType: number;
+//     roadSignValue: number;
+//     vehicleSpeed: number;
+//     altitude: number;
+//     latitude: number;
+//     longitude: number;
+//     timestamp: Date;
+//     vehicleStatus: number;
+//     alarmLabel: Buffer;
+// }
 
 // export interface DsmAlarm {
 //     alarmId: number;
@@ -183,36 +179,82 @@ export interface Position {
 }
 
 export interface AlarmLabel {
-  terminalId: string;
+  terminal_id: string;
   time: string
-  serialNumber: number;
-  attachmentCount: number;
+  serial_number: number;
+  attachment_count: number;
   reserved: number;
   raw: Buffer;
 }
 
 
 export interface DsmAlarm {
-    alarmId: number;
-    alarmStatus: string;
-    alarmType: string;
-    alarmLevel: number;
+    alarm_id: number;
+    alarm_status: string;
+    alarm_type: string;
+    alarm_level: number;
 
-    fatigueLevel: number;
-    vehicleSpeed: number;
+    fatigue_level: number;
+    vehicle_speed: number;
 
     // Position properties
     altitude: number;
     latitude: number;
     longitude: number;
-    timestamp: Date;
-    vehicleStatus: number;
+    alarm_time: Date;
+    vehicle_status: number;
 
     // Alarm label properties
-    terminalId: string;
+    terminal_id: string;
     time: Date;
-    serialNumber: number;
-    attachmentCount: number;
+    serial_number: number;
+    attachment_count: number;
     reserved: number;
     raw: Buffer;
+}
+
+
+export interface AdasAlarm {
+    
+    alarm_id: number;
+    alarm_status: string;
+    alarm_type: string;
+    alarm_level: number;
+    
+    vehicle_speed: number;
+    
+    front_vehicle_speed: number;
+    front_vehicle_distance: number;
+    lane_departure: number;
+    road_sign_type: number;
+    road_sign_value: number;
+    
+   // Position properties
+    altitude: number;
+    latitude: number;
+    longitude: number;
+    alarm_time: Date;
+    vehicle_status: number;
+
+    // Alarm label properties
+    terminal_id: string;
+    time: Date;
+    serial_number: number;
+    attachment_count: number;
+    reserved: number;
+    raw: Buffer;
+
+}
+
+
+export interface AlarmDto {
+    device_number: string;
+    alarm_id: number;
+    alarm_type: string;
+    alarm_number: string ;
+    latitude: number;
+    longitude: number;
+    attachment_count: number;
+    alarm_time: Date;
+    vehicle_speed: number;
 }
