@@ -85,7 +85,8 @@ export class JT808HeaderParser {
             device_number: deviceNumber,
             messageSerialNumber,
             subPackageInfo,
-            headerLength
+            headerLength,
+            is2019: protocolVersion === "2019"
         };
 
         return {

@@ -66,7 +66,8 @@ const server = net.createServer((socket) => {
     const locationHandler = new LocationHandler(
         locationParser,
         terminalRepository,
-        generalResponse
+        generalResponse,
+        responseEncoder
     );
 
     const messageHandler = new JT808MessageHandler(
