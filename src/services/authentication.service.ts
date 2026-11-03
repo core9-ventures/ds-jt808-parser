@@ -1,12 +1,14 @@
 import { timingSafeEqual } from "crypto";
 import type { InMemoryTerminalRepository } from "../repositories/in-memory-terminal.repository";
+import type { ITerminalRepository } from "../types";
+import type { TerminalRepository } from "../repositories/terminal.repository";
 
 
 
 export class AuthenticationService {
 
     constructor(
-        private readonly repository: InMemoryTerminalRepository
+        private readonly repository: ITerminalRepository 
     ) {}
 
     async authenticate(

@@ -18,6 +18,7 @@ import { LocationParser } from "./protocol/parsers/location-parser";
 import { RegistrationHandler } from "./protocol/handlers/registration-handler";
 import { AuthenticationHandler } from "./protocol/handlers/authentication-handler";
 import { LocationHandler } from "./protocol/handlers/location-handler";
+import { TerminalRepository } from "./repositories/terminal.repository";
 
 
 //const PORT = 7618;
@@ -30,12 +31,7 @@ const server = net.createServer((socket) => {
     const decoder = new JT808FrameDecoder(8192);
 
     //const pool = await sql.connect(dbConfig);
-    //const registrationRepository = new SqlRegistrationRepository();
-
-
-
-    
-   
+    const sqlRepository = new TerminalRepository();
 
     const headerParser = new JT808HeaderParser();
     const registrationParser = new RegistrationParser();
@@ -44,15 +40,15 @@ const server = net.createServer((socket) => {
     
     const serialGenerator = new SerialGenerator();
     
-    const registrationRepository = new InMemoryTerminalRepository(); 
+    //const registrationRepository = new InMemoryTerminalRepository(); 
 
     const responseEncoder = new JT808ResponseEncoder(serialGenerator);
     
     const generalResponse = new GeneralResponse(responseEncoder);
     const registrationResponse = new RegistrationResponse(responseEncoder);
     
-    const registrationService = new RegistrationService(registrationRepository);
-    const authenticationService = new AuthenticationService(registrationRepository);
+    const registrationService = new RegistrationService(sqlRepository);
+    const authenticationService = new AuthenticationService(sqlRepository);
 
     const registrationHandler = new RegistrationHandler(
         registrationParser,

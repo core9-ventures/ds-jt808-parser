@@ -1,11 +1,30 @@
 //import sql from "mssql";
+import { pool } from "../config/database";
 import { RegistrationResult, type RegistrationOutcome, type ITerminalRepository, type TerminalRegistration } from "../types";
+import pg from 'pg'
+const { Pool, Client } = pg
 
 export class TerminalRepository implements ITerminalRepository {
 
     // constructor(u
     //     private readonly pool: sql.ConnectionPool
     // ) {}
+
+    async create(devinceNumber: string, user: { name: string; email: string; age: number }): Promise<any> {
+        const { name, email, age } = user;
+
+        const query = `
+            INSERT INTO users (name, email, age)
+            VALUES ($1, $2, $3)
+            RETURNING *
+        `;
+
+        const values = [name, email, age];
+
+        const result = await pool.query(query, values);
+
+        return result.rows[0];
+    }
 
     async register(
 
@@ -37,4 +56,15 @@ export class TerminalRepository implements ITerminalRepository {
         };
 
     }
+
+     async findAuthenticationCode(
+        deviceNumber: string
+    ): Promise<string | null> {
+
+        
+
+        return null
+    }
+
+
 }

@@ -63,6 +63,11 @@ export interface ITerminalRepository {
         registration: TerminalRegistration,
         proposedAuthenticationCode: string
     ): Promise<RegistrationOutcome>;
+
+    findAuthenticationCode(
+        deviceNumber: string
+    ): Promise<string | null>
+
 }
 
 
