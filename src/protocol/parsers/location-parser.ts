@@ -26,25 +26,25 @@ function decodeBcdDateTime(buffer: Buffer): Date {
     const minute = Number(digits.slice(8, 10));
     const second = Number(digits.slice(10, 12));
 
-    // JT808 timestamps are generally interpreted in China Standard Time.
-    // Store the instant in UTC.
-    // const date = new Date(Date.UTC(
-    //     year,
-    //     month - 1,
-    //     day,
-    //     hour - 8,
-    //     minute,
-    //     second
-    // ));
-
-    const date = new Date(
+    //JT808 timestamps are generally interpreted in China Standard Time.
+    //Store the instant in UTC.
+    const date = new Date(Date.UTC(
         year,
         month - 1,
         day,
         hour - 8,
         minute,
         second
-    );
+    ));
+
+    // const date = new Date(
+    //     year,
+    //     month - 1,
+    //     day,
+    //     hour - 8,
+    //     minute,
+    //     second
+    // );
 
     if (
         month < 1 || month > 12 ||
