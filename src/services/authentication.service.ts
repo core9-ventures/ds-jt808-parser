@@ -1,5 +1,4 @@
 import { timingSafeEqual } from "crypto";
-import type { InMemoryTerminalRepository } from "../repositories/in-memory-terminal.repository";
 import type { ITerminalRepository } from "../types";
 import type { TerminalRepository } from "../repositories/terminal.repository";
 

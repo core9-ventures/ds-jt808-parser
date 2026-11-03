@@ -27,6 +27,8 @@ export interface JT808Header {
     subPackageInfo: SubPackageInfo | undefined;
 
     headerLength: number;
+
+    is2019: boolean;
 }
 
 export interface ParsedJT808Message {
