@@ -19,11 +19,18 @@ export class LocationHandler {
         if(location.dsmAlarms && location.dsmAlarms.attachmentCount > 0){
             console.log("DSM Alarms:", location.dsmAlarms);
             
-            await this.repo.create(
-                location.deviceNumber,
-                location.dsmAlarms.alarmType,
-                location.dsmAlarms.attachmentCount,
-             );
+            try {
+
+                await this.repo.create(
+                    location.deviceNumber,
+                    location.dsmAlarms.alarmType,
+                    location.dsmAlarms.attachmentCount,
+                );
+
+            } catch (error) {
+
+            }
+            
         }
        
         console.log("Terminal location report:", location);
