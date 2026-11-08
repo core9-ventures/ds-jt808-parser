@@ -152,8 +152,8 @@ export class LocationHandler {
     }): Buffer {
 
         const serverIp = process.env.LIVESTREAM_SERVER_IP;
-        const tcpPort = 0;
-        const udpPort = 10000
+        const tcpPort = 7615;
+        const udpPort = 7612
 
         let ipBuf: Buffer = Buffer.alloc(0);
 
