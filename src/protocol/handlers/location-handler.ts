@@ -8,6 +8,9 @@ import type { RegistrationResponse } from "../responses/registration-response";
 import type { JT808ResponseEncoder } from "../responses/response-encoder";
 
 export class LocationHandler {
+
+    private static STREAM = 1;
+
     constructor(
         private readonly parser: LocationParser,
         private readonly repo: TerminalRepository,
@@ -47,29 +50,37 @@ export class LocationHandler {
             generalResponse
         ];
 
-        // Request ADAS attachments.
-        if (location.adasAlarms && location.adasAlarms.attachment_count > 0) {
-            const adasRequest = this.createAttachmentRequest(
-                header,
-                location.adasAlarms
-            );
-
-            if (adasRequest) {
-                outgoingMessages.push(adasRequest);
+        if (LocationHandler.STREAM == 1) {
+            const streamRequest = this.createStreamRequest(header)
+            if (streamRequest) {
+                outgoingMessages.push(streamRequest)
             }
+            LocationHandler.STREAM += 1
         }
+
+        // Request ADAS attachments.
+        // if (location.adasAlarms && location.adasAlarms.attachment_count > 0) {
+        //     const adasRequest = this.createAttachmentRequest(
+        //         header,
+        //         location.adasAlarms
+        //     );
+
+        //     if (adasRequest) {
+        //         outgoingMessages.push(adasRequest);
+        //     }
+        // }
 
         // Request DSM attachments.
-        if (location.dsmAlarms && location.dsmAlarms.attachment_count > 0) {
-            const dsmRequest = this.createAttachmentRequest(
-                header,
-                location.dsmAlarms
-            );
+        // if (location.dsmAlarms && location.dsmAlarms.attachment_count > 0) {
+        //     const dsmRequest = this.createAttachmentRequest(
+        //         header,
+        //         location.dsmAlarms
+        //     );
 
-            if (dsmRequest) {
-                outgoingMessages.push(dsmRequest);
-            }
-        }
+        //     if (dsmRequest) {
+        //         outgoingMessages.push(dsmRequest);
+        //     }
+        // }
 
         // Return both complete JT808 frames in their correct order.
         return Buffer.concat(outgoingMessages);
@@ -123,6 +134,69 @@ export class LocationHandler {
 
         return body;
     }
+
+    /**
+ * Build the body for 0x9101 (real-time A/V request).
+ */
+    private build9101Body({
+        channel = 1,
+        dataType = 0,
+        streamType = 0,
+    }: {
+        // serverIp: string;
+        // tcpPort?: number;
+        // udpPort: number;
+        channel?: number;
+        dataType?: number;
+        streamType?: number;
+    }): Buffer {
+
+        const serverIp = process.env.LIVESTREAM_SERVER_IP;
+        const tcpPort = 8888;
+        const udpPort = 10000
+
+        let ipBuf: Buffer = Buffer.alloc(0);
+
+        if(serverIp){
+            ipBuf = Buffer.from(serverIp, 'ascii');
+        }
+
+        const buf = Buffer.alloc(1 + ipBuf.length + 2 + 2 + 3);
+
+        let o = 0;
+
+        buf[o++] = ipBuf.length;
+
+        ipBuf.copy(buf, o);
+        o += ipBuf.length;
+
+        buf.writeUInt16BE(tcpPort, o);
+        o += 2;
+
+        buf.writeUInt16BE(udpPort, o);
+        o += 2;
+
+        buf[o++] = channel;
+        buf[o++] = dataType;
+        buf[o++] = streamType;
+
+        return buf;
+    }
+
+    private createStreamRequest(
+        header: JT808Header,
+    ): Buffer | null {
+
+        const body = this.build9101Body({channel: 1});
+
+        // Your existing encoder API.
+        return this.responseEncoder.encode(
+            0x9101,
+            header,
+            body
+        );
+    }
+
 
     private createAttachmentRequest(
         header: JT808Header,
